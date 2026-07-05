@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+
+# generated PWA icons (run: npm run icons)
+public/icons/
+
+# vite-plugin-pwa output
+dev-dist
+
+*.tsbuildinfo
+.playwright-cli/
+.claude/

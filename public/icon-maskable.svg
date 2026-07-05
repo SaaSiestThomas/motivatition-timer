@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Motivation Timer">
+  <!-- full-bleed background so the OS can mask to any shape without showing gaps -->
+  <rect width="512" height="512" fill="#0E4F5C"/>
+  <!-- motif kept inside the central safe zone (~60%) -->
+  <g transform="translate(256 256) scale(0.62) translate(-256 -256)">
+    <g fill="none" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round">
+      <path d="M150 196 a112 112 0 0 1 212 -18"/>
+      <path d="M362 316 a112 112 0 0 1 -212 18"/>
+    </g>
+    <path d="M362 120 l8 70 -70 -8 z" fill="#FFFFFF"/>
+    <path d="M150 392 l-8 -70 70 8 z" fill="#FF3399"/>
+    <circle cx="256" cy="256" r="40" fill="#FF3399"/>
+  </g>
+</svg>

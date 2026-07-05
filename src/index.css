@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  /* prevent overscroll bounce from revealing white behind the color flip */
+  overscroll-behavior: none;
+  background-color: #0e4f5c;
+}
+
+@keyframes mt-pop {
+  0% {
+    transform: scale(0.82);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.mt-pop {
+  animation: mt-pop 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-pop {
+    animation: none;
+  }
+}
