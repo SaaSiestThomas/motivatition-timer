@@ -5,7 +5,12 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const WORK_BG = "#0E4F5C";
 
+// Served from https://saasiestthomas.github.io/motivatition-timer/ on GitHub Pages.
+// Change to "/" if the app ever moves to a host that serves it from the domain root.
+const BASE = "/motivatition-timer/";
+
 export default defineConfig({
+  base: BASE,
   plugins: [
     react(),
     tailwindcss(),
@@ -21,7 +26,9 @@ export default defineConfig({
         background_color: WORK_BG,
         display: "standalone",
         orientation: "portrait",
-        start_url: "/",
+        id: BASE,
+        start_url: BASE,
+        scope: BASE,
         icons: [
           {
             src: "icons/icon-192.png",

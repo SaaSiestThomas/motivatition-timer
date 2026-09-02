@@ -7,6 +7,15 @@ right behind it, and dial Work up on the fly as you find your flow.
 Built web-first (Vite + React + TypeScript + Tailwind), installable as a PWA, with the
 timer logic kept UI-free so it ports cleanly to a later iOS build via Capacitor.
 
+## Live version
+
+**https://saasiestthomas.github.io/motivatition-timer/**
+
+Every push to `master` rebuilds and redeploys via `.github/workflows/deploy.yml`. Because
+Pages serves the app from a sub-path, `vite.config.ts` sets `base` (and the PWA
+`start_url`/`scope`) to `/motivatition-timer/` — change that constant if the app ever
+moves to a host that serves it from the domain root.
+
 ## Commands
 
 ```bash
