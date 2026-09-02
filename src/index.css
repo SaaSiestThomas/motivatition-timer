@@ -7,9 +7,19 @@ body,
   margin: 0;
 }
 
+/* Pin the app to the viewport that is actually visible, so it never scrolls behind
+   Safari's toolbars. svh (the *small* viewport height, i.e. with the browser chrome
+   showing) rather than dvh, so the layout does not jump as the toolbars collapse.
+   Browsers without svh fall back to the height: 100% above. */
+#root {
+  height: 100svh;
+  overflow: hidden;
+}
+
 body {
   /* prevent overscroll bounce from revealing white behind the color flip */
   overscroll-behavior: none;
+  overflow: hidden;
   background-color: #0e4f5c;
 }
 

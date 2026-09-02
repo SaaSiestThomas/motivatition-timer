@@ -37,7 +37,13 @@ are generated, not committed.
   across multiple interval boundaries). This module has no React/DOM/audio dependency so
   it can be reused as-is on iOS.
 - **`src/timer/sounds.ts`** — two synthesized Web Audio flip tones (calm for Work, bright
-  arcade run for Play). Unlocked on the first Start tap.
+  arcade run for Play). Unlocked on the first Start tap. On iOS this module also has to
+  set `navigator.audioSession.type = "playback"`: Web Audio otherwise runs in an
+  "ambient" session that the phone's hardware ringer switch silences outright, so a
+  phone on silent plays nothing at all ([WebKit
+  237322](https://bugs.webkit.org/show_bug.cgi?id=237322)). The session is claimed on
+  Start and handed back on Pause/Reset, and re-acquired when the tab returns to the
+  foreground, since iOS suspends the context whenever the app is backgrounded.
 - **`src/timer/haptics.ts`** — `navigator.vibrate` on flip where supported.
 - **`src/timer/useWakeLock.ts`** — keeps the screen awake while running, re-acquiring the
   lock when the tab becomes visible again.
@@ -51,5 +57,11 @@ are generated, not committed.
 - **+1 min** stretches the current interval for when you are in flow.
 - **Demo: fast** runs the clock in seconds instead of minutes to feel the flips quickly.
   Testing only.
+- The layout is pinned to `100svh` and never scrolls: the whole screen has to fit,
+  including on a 320px-wide phone, so the clock is capped by viewport height as well as
+  width and the two dials are allowed to shrink.
+- iOS gives no haptics — `navigator.vibrate` is not implemented in Safari — and silences
+  audio entirely once the app is backgrounded or the screen locks. The wake lock keeps
+  the screen on while the timer runs, which is what keeps the flips audible.
 
 The original brief and mockup live in `Documentation/`.

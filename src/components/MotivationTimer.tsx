@@ -15,7 +15,7 @@ import {
   DEMO_UNIT_MS,
   type TimerState,
 } from "../timer/timerEngine";
-import { unlock, playFlip } from "../timer/sounds";
+import { unlock, playFlip, release, refresh } from "../timer/sounds";
 import { vibrate } from "../timer/haptics";
 import { useWakeLock } from "../timer/useWakeLock";
 
@@ -49,7 +49,19 @@ export default function MotivationTimer() {
   }, [muted]);
 
   // Keep the screen awake only while actively counting down.
-  useWakeLock(state.isRunning && !state.isPaused);
+  const isCountingDown = state.isRunning && !state.isPaused;
+  useWakeLock(isCountingDown);
+
+  // iOS suspends the AudioContext whenever the tab goes to the background, and does not
+  // resume it on its own, so the flips would come back silent. Re-acquire on return.
+  useEffect(() => {
+    if (!isCountingDown) return;
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [isCountingDown]);
 
   const signalFlip = (mode: TimerState["mode"]) => {
     playFlip(mode, mutedRef.current);
@@ -82,13 +94,20 @@ export default function MotivationTimer() {
     setNow(t);
     signalFlip("work");
   };
-  const onPause = () => setState((prev) => pauseTimer(prev, Date.now()));
+  const onPause = () => {
+    release();
+    setState((prev) => pauseTimer(prev, Date.now()));
+  };
   const onResume = () => {
+    unlock();
     const t = Date.now();
     setState((prev) => resumeTimer(prev, t, unitMs));
     setNow(t);
   };
-  const onReset = () => setState((prev) => resetTimer(prev));
+  const onReset = () => {
+    release();
+    setState((prev) => resetTimer(prev));
+  };
   const onAddMinute = () => {
     setState((prev) => addUnit(prev, unitMs));
     setNow(Date.now());
@@ -110,20 +129,23 @@ export default function MotivationTimer() {
 
   return (
     <div
-      className="min-h-full w-full flex flex-col text-white select-none"
+      className="h-full w-full flex flex-col overflow-hidden text-white select-none"
       style={{
         backgroundColor: bg,
+        // viewport-fit=cover means the notch and home indicator overlap the page.
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
         transition: "background-color 120ms ease",
         fontFamily:
           "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {/* top bar */}
-      <div className="flex items-center justify-between px-6 pt-6">
-        <div className="text-xs font-bold tracking-[0.2em] uppercase opacity-80">
+      <div className="flex items-center justify-between gap-2 px-4 pt-4">
+        <div className="text-xs font-bold tracking-[0.2em] uppercase opacity-80 min-w-0 truncate">
           {state.cycleCount} {state.cycleCount === 1 ? "round" : "rounds"} done
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <button
             className={pill}
             onClick={() => setMuted((m) => !m)}
@@ -144,16 +166,16 @@ export default function MotivationTimer() {
       </div>
 
       {/* center */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-4">
         <div key={`${state.mode}-${pulse}`} className="mt-pop text-center">
-          <div className="text-2xl font-black tracking-[0.22em] uppercase opacity-90 mb-2 pl-[0.22em]">
+          <div className="text-xl sm:text-2xl font-black tracking-[0.22em] uppercase opacity-90 mb-2 pl-[0.22em]">
             {isWork ? "Work Hard" : "Play Hard"}
           </div>
           <div
             className="font-black leading-none"
             style={{
               fontVariantNumeric: "tabular-nums",
-              fontSize: "clamp(5rem, 26vw, 12rem)",
+              fontSize: "clamp(3rem, min(24vw, 17vh), 12rem)",
             }}
           >
             {mm}:{ss}
@@ -161,7 +183,7 @@ export default function MotivationTimer() {
         </div>
 
         <button
-          className={`${pill} mt-6 ${!state.isRunning ? "opacity-40 pointer-events-none" : ""}`}
+          className={`${pill} mt-5 shrink-0 ${!state.isRunning ? "opacity-40 pointer-events-none" : ""}`}
           onClick={onAddMinute}
           aria-label="Add one minute to the current interval"
         >
@@ -171,7 +193,7 @@ export default function MotivationTimer() {
       </div>
 
       {/* primary controls */}
-      <div className="flex items-center justify-center gap-3 px-6">
+      <div className="flex items-center justify-center gap-3 px-4">
         {!state.isRunning ? (
           <button className={ctrlBtn} onClick={onStart}>
             Start
@@ -187,8 +209,8 @@ export default function MotivationTimer() {
       </div>
 
       {/* dials */}
-      <div className="px-6 py-6 mt-4 bg-black/15">
-        <div className="flex items-center justify-between gap-3 mb-3">
+      <div className="px-4 py-4 mt-3 bg-black/15">
+        <div className="flex items-stretch gap-2 mb-3">
           <Dial
             label="Work Hard"
             value={state.workUnits}
@@ -203,7 +225,7 @@ export default function MotivationTimer() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-bold tracking-widest uppercase opacity-70 mr-1">
             Quick
           </span>
